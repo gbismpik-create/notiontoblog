@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 const PRICE_IDS = {
-  basic: 'price_1SZAQCCt9py6nUBqxiye8x6k',
-  pro: 'price_1SZAUBCt9py6nUBqTpRvNoY0',
+  pro_monthly: 'price_test_pro_monthly', // Replace with your actual test price ID for $9/month
+  pro_yearly: 'price_test_pro_yearly',   // Replace with your actual test price ID for $90/year
 };
 
 const Settings = () => {
@@ -97,7 +97,7 @@ const Settings = () => {
 
   const plan = subscription?.plan || 'free';
   const isSubscribed = subscription?.subscribed || false;
-  const maxExports = plan === 'pro' ? 'Unlimited' : plan === 'basic' ? 20 : 5;
+  const maxExports = plan === 'pro' ? 'Unlimited' : 5;
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -163,7 +163,7 @@ const Settings = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     Current Plan
-                    <Badge variant={plan === 'pro' ? 'default' : plan === 'basic' ? 'secondary' : 'outline'}>
+                    <Badge variant={plan === 'pro' ? 'default' : 'outline'}>
                       {plan.charAt(0).toUpperCase() + plan.slice(1)}
                     </Badge>
                   </CardTitle>
@@ -171,51 +171,27 @@ const Settings = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {plan === 'free' && (
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       <p className="text-sm text-muted-foreground">
                         You're currently on the free plan with 5 exports per month.
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2">
                         <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.basic)}
+                          onClick={() => handleUpgrade(PRICE_IDS.pro_monthly)}
+                          disabled={loading}
+                          className="bg-gradient-hero shadow-md hover:shadow-lg w-full"
+                        >
+                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          Upgrade to Pro - $9/month
+                        </Button>
+                        <Button
+                          onClick={() => handleUpgrade(PRICE_IDS.pro_yearly)}
                           disabled={loading}
                           variant="outline"
+                          className="w-full"
                         >
                           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Basic - $9/month
-                        </Button>
-                        <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.pro)}
-                          disabled={loading}
-                          className="bg-gradient-hero shadow-md hover:shadow-lg"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Pro - $19/month
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {plan === 'basic' && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        You're on the Basic plan with 20 exports per month.
-                      </p>
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.pro)}
-                          disabled={loading}
-                          className="bg-gradient-hero shadow-md hover:shadow-lg"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Pro - $19/month
-                        </Button>
-                        <Button
-                          onClick={handleManageSubscription}
-                          disabled={loading}
-                          variant="outline"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Manage Subscription
+                          Upgrade to Pro - $90/year (Save $18)
                         </Button>
                       </div>
                     </div>
