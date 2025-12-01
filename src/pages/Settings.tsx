@@ -171,91 +171,61 @@ const Settings = () => {
                   <CardDescription>Manage your subscription</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {plan === 'free' && (
-                    <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        You're currently on the free plan with 5 exports per month.
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.basic_monthly)}
-                          disabled={loading}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Basic - $9/mo • 20 exports
-                        </Button>
-                        <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.pro_monthly)}
-                          disabled={loading}
-                          className="bg-gradient-hero shadow-md hover:shadow-lg w-full"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Pro - $19/mo • Unlimited (Most Popular)
-                        </Button>
-                        <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.pro_yearly)}
-                          disabled={loading}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Pro - $190/year • Unlimited (save 17%)
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {plan === 'basic' && (
-                    <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        You're on the Basic plan with 20 exports per month.
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.pro_monthly)}
-                          disabled={loading}
-                          className="bg-gradient-hero shadow-md hover:shadow-lg w-full"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Pro - $19/mo • Unlimited (Most Popular)
-                        </Button>
-                        <Button
-                          onClick={() => handleUpgrade(PRICE_IDS.pro_yearly)}
-                          disabled={loading}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Pro - $190/year • Unlimited (save 17%)
-                        </Button>
-                        <Button
-                          onClick={handleManageSubscription}
-                          disabled={loading}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Manage Subscription
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {plan === 'pro' && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        You're on the Pro plan with unlimited exports.
-                      </p>
+                {plan === 'free' && (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      You're currently on the free plan with 5 exports per month.
+                    </p>
+                    <div className="flex flex-col gap-2">
                       <Button
-                        onClick={handleManageSubscription}
+                        onClick={() => handleUpgrade(PRICE_IDS.basic_monthly)}
                         disabled={loading}
                         variant="outline"
+                        className="w-full"
                       >
                         {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        Manage Subscription
+                        Basic - $9/mo • 20 exports
+                      </Button>
+                      <Button
+                        onClick={() => handleUpgrade(PRICE_IDS.pro_monthly)}
+                        disabled={loading}
+                        className="bg-gradient-hero shadow-md hover:shadow-lg w-full"
+                      >
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        Pro - $19/mo • Unlimited (Most Popular)
+                      </Button>
+                      <Button
+                        onClick={() => handleUpgrade(PRICE_IDS.pro_yearly)}
+                        disabled={loading}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        Pro - $190/year • Unlimited (save 17%)
                       </Button>
                     </div>
-                  )}
+                  </div>
+                )}
+                {(plan === 'basic' || plan === 'pro') && (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {plan === 'basic' 
+                        ? "You're on the Basic plan with 20 exports per month." 
+                        : "You're on the Pro plan with unlimited exports."}
+                    </p>
+                    <Button
+                      onClick={handleManageSubscription}
+                      disabled={loading}
+                      variant="outline"
+                    >
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                      Manage Subscription
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Use the customer portal to upgrade, downgrade, or cancel your subscription.
+                    </p>
+                  </div>
+                )}
                   {subscription?.subscription_end && (
                     <p className="text-xs text-muted-foreground">
                       Next billing date: {new Date(subscription.subscription_end).toLocaleDateString()}
