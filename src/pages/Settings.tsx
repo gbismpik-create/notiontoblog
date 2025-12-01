@@ -9,9 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 const PRICE_IDS = {
-  basic_monthly: 'YOUR_STRIPE_BASIC_MONTHLY_PRICE_ID', // Get from Stripe Dashboard
-  pro_monthly: 'YOUR_STRIPE_PRO_MONTHLY_PRICE_ID',     // Get from Stripe Dashboard
-  pro_yearly: 'YOUR_STRIPE_PRO_YEARLY_PRICE_ID',       // Get from Stripe Dashboard
+  basic_monthly: 'price_1SZcgiCt9py6nUBqabHCq46B',
+  pro_monthly: 'price_1SZchCCt9py6nUBq9BzYm2BQ',
+  pro_yearly: 'price_1SZcicCt9py6nUBqmrGxge7L',
 };
 
 const Settings = () => {
@@ -184,7 +184,7 @@ const Settings = () => {
                           className="w-full"
                         >
                           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Basic - $9/month
+                          Basic - $9/mo • 20 exports
                         </Button>
                         <Button
                           onClick={() => handleUpgrade(PRICE_IDS.pro_monthly)}
@@ -192,7 +192,7 @@ const Settings = () => {
                           className="bg-gradient-hero shadow-md hover:shadow-lg w-full"
                         >
                           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Pro - $19/month
+                          Pro - $19/mo • Unlimited (Most Popular)
                         </Button>
                         <Button
                           onClick={() => handleUpgrade(PRICE_IDS.pro_yearly)}
@@ -201,7 +201,7 @@ const Settings = () => {
                           className="w-full"
                         >
                           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Pro - $190/year
+                          Pro - $190/year • Unlimited (save 17%)
                         </Button>
                       </div>
                     </div>
@@ -218,7 +218,7 @@ const Settings = () => {
                           className="bg-gradient-hero shadow-md hover:shadow-lg w-full"
                         >
                           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Pro - $19/month
+                          Pro - $19/mo • Unlimited (Most Popular)
                         </Button>
                         <Button
                           onClick={() => handleUpgrade(PRICE_IDS.pro_yearly)}
@@ -227,7 +227,7 @@ const Settings = () => {
                           className="w-full"
                         >
                           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                          Upgrade to Pro - $190/year
+                          Pro - $190/year • Unlimited (save 17%)
                         </Button>
                         <Button
                           onClick={handleManageSubscription}
