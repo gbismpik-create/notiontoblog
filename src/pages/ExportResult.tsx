@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Download, Copy, ArrowLeft, ChevronDown } from "lucide-react";
+import { Sparkles, Download, Copy, ArrowLeft, ChevronDown, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +12,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import DOMPurify from "dompurify";
 
 interface ExportData {
@@ -31,6 +41,7 @@ const ExportResult = () => {
   const { toast } = useToast();
   const [exportData, setExportData] = useState<ExportData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchExport = async () => {
@@ -43,7 +54,7 @@ const ExportResult = () => {
         .from("exports")
         .select("*")
         .eq("id", exportId)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         toast({
@@ -190,6 +201,39 @@ const ExportResult = () => {
     });
   };
 
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!exportData) return;
+
+    try {
+      const { error } = await supabase
+        .from("exports")
+        .delete()
+        .eq("id", exportData.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Deleted",
+        description: "Export has been deleted successfully",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete export",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle">
@@ -258,6 +302,14 @@ const ExportResult = () => {
               <Download className="h-4 w-4" />
               Download Markdown
             </Button>
+            <Button
+              onClick={handleDeleteClick}
+              variant="ghost"
+              className="gap-2 hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </Button>
           </div>
         </div>
       </header>
@@ -284,6 +336,28 @@ const ExportResult = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this export?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete "{exportData.title}"
+              and remove it from your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
