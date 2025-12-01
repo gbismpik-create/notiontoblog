@@ -9,9 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 const PRICE_IDS = {
-  basic_monthly: 'price_test_basic_monthly', // Replace with actual Stripe test price ID for $9/month
-  pro_monthly: 'price_test_pro_monthly',     // Replace with actual Stripe test price ID for $19/month
-  pro_yearly: 'price_test_pro_yearly',       // Replace with actual Stripe test price ID for $190/year
+  basic_monthly: 'YOUR_STRIPE_BASIC_MONTHLY_PRICE_ID', // Get from Stripe Dashboard
+  pro_monthly: 'YOUR_STRIPE_PRO_MONTHLY_PRICE_ID',     // Get from Stripe Dashboard
+  pro_yearly: 'YOUR_STRIPE_PRO_YEARLY_PRICE_ID',       // Get from Stripe Dashboard
 };
 
 const Settings = () => {
