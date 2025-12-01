@@ -175,8 +175,14 @@ const Landing = () => {
             <CardHeader>
               <CardTitle className="text-2xl">Pro</CardTitle>
               <div className="mt-4">
-                <span className="text-5xl font-bold">$19</span>
-                <span className="text-muted-foreground">/month</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-bold">$19</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-xl text-muted-foreground">or $190/year</span>
+                  <Badge variant="secondary" className="text-xs">Save $38</Badge>
+                </div>
               </div>
               <CardDescription className="text-base mt-2">
                 For professional content creators
@@ -201,7 +207,7 @@ const Landing = () => {
               </ul>
               <Link to="/auth" className="block">
                 <Button className="w-full bg-gradient-hero shadow-md hover:shadow-lg" size="lg">
-                  Get Started
+                  Start Pro Trial
                 </Button>
               </Link>
             </CardContent>
