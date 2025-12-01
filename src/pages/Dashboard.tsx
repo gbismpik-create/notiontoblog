@@ -5,10 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, LogOut, Settings, Upload, Clock, FileText } from "lucide-react";
+import { Sparkles, LogOut, Settings, Upload, Clock, FileText, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
@@ -19,6 +29,8 @@ const Dashboard = () => {
   const [subscription, setSubscription] = useState<any>(null);
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [exportToDelete, setExportToDelete] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -86,6 +98,42 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleDeleteClick = (exportId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExportToDelete(exportId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!exportToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("exports")
+        .delete()
+        .eq("id", exportToDelete);
+
+      if (error) throw error;
+
+      setExports(exports.filter(exp => exp.id !== exportToDelete));
+      
+      toast({
+        title: "Deleted",
+        description: "Export has been deleted successfully",
+      });
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete export",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setExportToDelete(null);
+    }
   };
 
   const handleExport = async () => {
@@ -312,12 +360,21 @@ const Dashboard = () => {
                           </p>
                         </div>
                       </div>
-                      <Badge 
-                        variant={exp.status === "completed" ? "default" : "secondary"}
-                        className="ml-2 flex-shrink-0"
-                      >
-                        {exp.status}
-                      </Badge>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Badge 
+                          variant={exp.status === "completed" ? "default" : "secondary"}
+                        >
+                          {exp.status}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => handleDeleteClick(exp.id, e)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -326,6 +383,28 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the export
+              and remove it from your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
