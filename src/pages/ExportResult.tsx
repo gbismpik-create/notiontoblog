@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import DOMPurify from "dompurify";
 
 interface ExportData {
   id: string;
@@ -278,7 +279,7 @@ const ExportResult = () => {
                 fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                 lineHeight: "1.6",
               }}
-              dangerouslySetInnerHTML={{ __html: exportData.html }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(exportData.html) }}
             />
           </CardContent>
         </Card>
