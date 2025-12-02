@@ -98,13 +98,28 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      // Use scope: 'local' to clear session even if server-side fails
+      // Clear Supabase auth session
       await supabase.auth.signOut({ scope: 'local' });
-      navigate("/auth");
+      
+      // Clear any remaining local storage auth data
+      localStorage.removeItem('sb-caibitihyznvwyxqrvtg-auth-token');
+      
+      // Clear state
+      setUser(null);
+      
+      toast({
+        title: "Signed out successfully",
+        description: "See you soon! 👋",
+      });
+      
+      // Redirect to landing page
+      navigate("/", { replace: true });
     } catch (error) {
       console.error('Sign out error:', error);
-      // Force navigation even on error
-      navigate("/auth");
+      // Force clear and redirect even on error
+      localStorage.removeItem('sb-caibitihyznvwyxqrvtg-auth-token');
+      setUser(null);
+      navigate("/", { replace: true });
     }
   };
 
