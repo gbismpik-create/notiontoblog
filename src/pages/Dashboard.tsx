@@ -97,7 +97,15 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Use scope: 'local' to clear session even if server-side fails
+      await supabase.auth.signOut({ scope: 'local' });
+      navigate("/auth");
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Force navigation even on error
+      navigate("/auth");
+    }
   };
 
   const handleDeleteClick = (exportId: string, e: React.MouseEvent) => {
