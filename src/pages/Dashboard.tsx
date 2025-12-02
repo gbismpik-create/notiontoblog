@@ -36,12 +36,24 @@ const Dashboard = () => {
 
   const checkSubscription = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setSubscription({ plan: 'free' });
+        return;
+      }
+      
       const { data, error } = await supabase.functions.invoke('check-subscription');
-      if (!error && data) {
+      if (error) {
+        console.error('Subscription check error:', error);
+        setSubscription({ plan: 'free' });
+        return;
+      }
+      if (data) {
         setSubscription(data);
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
+      setSubscription({ plan: 'free' });
     }
   };
 
