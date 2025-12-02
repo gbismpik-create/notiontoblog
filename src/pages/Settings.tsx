@@ -24,8 +24,31 @@ const Settings = () => {
 
   const checkSubscription = async (retryCount = 0): Promise<void> => {
     try {
+      // First refresh the session to ensure we have a valid token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.log('No valid session, redirecting to auth');
+        await supabase.auth.signOut({ scope: 'local' });
+        navigate('/auth');
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('check-subscription');
-      if (error) throw error;
+      
+      // Handle 401 errors by forcing re-authentication
+      if (error) {
+        const errorMsg = error.message || '';
+        if (errorMsg.includes('401') || errorMsg.includes('Session expired') || errorMsg.includes('not authenticated')) {
+          console.log('Session invalid, signing out');
+          await supabase.auth.signOut({ scope: 'local' });
+          toast.error('Session expired. Please sign in again.');
+          navigate('/auth');
+          return;
+        }
+        throw error;
+      }
+      
       setSubscription(data);
       
       // If we just came from checkout success and still show free, retry a few times
@@ -86,11 +109,31 @@ const Settings = () => {
   const handleUpgrade = async (priceId: string) => {
     setLoading(true);
     try {
+      // Refresh session before making the call
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        toast.error('Session expired. Please sign in again.');
+        await supabase.auth.signOut({ scope: 'local' });
+        navigate('/auth');
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId },
       });
 
-      if (error) throw error;
+      if (error) {
+        const errorMsg = error.message || '';
+        if (errorMsg.includes('401') || errorMsg.includes('not authenticated')) {
+          toast.error('Session expired. Please sign in again.');
+          await supabase.auth.signOut({ scope: 'local' });
+          navigate('/auth');
+          return;
+        }
+        throw error;
+      }
+      
       if (data?.url) {
         window.open(data.url, '_blank');
       }
