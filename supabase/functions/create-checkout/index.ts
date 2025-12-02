@@ -7,6 +7,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -19,6 +24,7 @@ serve(async (req) => {
 
   try {
     const { priceId } = await req.json();
+    logStep('Checkout started', { priceId });
 
     if (!priceId) {
       return new Response(
@@ -46,6 +52,8 @@ serve(async (req) => {
       );
     }
 
+    logStep('User authenticated', { userId: user.id, email: user.email });
+
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2025-08-27.basil',
     });
@@ -56,26 +64,43 @@ serve(async (req) => {
     
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      logStep('Found existing customer', { customerId });
+    } else {
+      // Create a new customer
+      const newCustomer = await stripe.customers.create({
+        email: user.email,
+        metadata: { user_id: user.id },
+      });
+      customerId = newCustomer.id;
+      logStep('Created new customer', { customerId });
     }
 
-    // Create checkout session
+    // Get the origin for redirect URLs
+    const origin = req.headers.get('origin') || 'https://notion-to-blog.lovable.app';
+    
+    // Create checkout session with customer linked
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/settings?success=true`,
-      cancel_url: `${req.headers.get('origin')}/settings?canceled=true`,
+      success_url: `${origin}/settings?success=true`,
+      cancel_url: `${origin}/settings?canceled=true`,
+      metadata: {
+        user_id: user.id,
+      },
     });
+
+    logStep('Checkout session created', { sessionId: session.id, url: session.url });
 
     return new Response(
       JSON.stringify({ url: session.url }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
-    console.error('Checkout error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logStep('ERROR', { message: errorMessage });
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: errorMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
