@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,15 +19,25 @@ const Settings = () => {
   const [subscription, setSubscription] = useState<any>(null);
   const [exportCount, setExportCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const checkSubscription = async () => {
+  const checkSubscription = async (retryCount = 0): Promise<void> => {
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription');
       if (error) throw error;
       setSubscription(data);
+      
+      // If we just came from checkout success and still show free, retry a few times
+      // (webhook might not have processed yet)
+      if (searchParams.get('success') === 'true' && data?.plan === 'free' && retryCount < 3) {
+        console.log(`Subscription still free after checkout, retrying... (${retryCount + 1}/3)`);
+        setTimeout(() => checkSubscription(retryCount + 1), 2000);
+      }
     } catch (error) {
       console.error('Error checking subscription:', error);
+      // Fallback: set to free plan on error
+      setSubscription({ plan: 'free', subscribed: false });
     }
   };
 
@@ -53,11 +63,25 @@ const Settings = () => {
         return;
       }
       setUser(session.user);
+      
+      // Handle success/canceled params from Stripe checkout
+      const success = searchParams.get('success');
+      const canceled = searchParams.get('canceled');
+      
+      if (success === 'true') {
+        toast.success('Payment successful! Your plan is being activated...');
+        // Clear the URL params
+        setSearchParams({});
+      } else if (canceled === 'true') {
+        toast.info('Checkout was canceled');
+        setSearchParams({});
+      }
+      
       await checkSubscription();
       await fetchExportCount(session.user.id);
     };
     init();
-  }, [navigate]);
+  }, [navigate, searchParams, setSearchParams]);
 
   const handleUpgrade = async (priceId: string) => {
     setLoading(true);
